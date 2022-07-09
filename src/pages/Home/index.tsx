@@ -58,9 +58,7 @@ const Home = (): JSX.Element => {
 
   return (
     <ProductList>
-      {
-        products.map(product => (<ProductCard product={product} />))
-      }
+      {products.map(product => (<ProductCard product={product} />))}
     </ProductList>
   );
 };
