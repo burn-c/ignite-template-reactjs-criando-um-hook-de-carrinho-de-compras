@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { ProductList } from './styles';
 // import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
-// import { useCart } from '../../hooks/useCart';
+import { useCart } from '../../hooks/useCart';
 import { getAllProducts } from '../../services/products';
 import { ProductCard } from '../../components';
 import { toast } from 'react-toastify';
@@ -25,7 +25,7 @@ interface ProductFormatted extends Product {
 
 const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
-  // const { addProduct, cart } = useCart();
+  const { addProduct, cart } = useCart();
 
   // const cartItemsAmount = cart.reduce((sumAmount, product) => {
   //   // TODO

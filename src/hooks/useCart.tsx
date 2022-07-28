@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
-import { api } from '../services/api';
+import { getProduct, getProductStock } from '../services/products';
 import { Product, Stock } from '../types';
 
 interface CartProviderProps {
@@ -9,7 +9,7 @@ interface CartProviderProps {
 
 interface UpdateProductAmount {
   productId: number;
-  amount: number;
+  amount?: number;
 }
 
 interface CartContextData {
@@ -24,6 +24,7 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
 
+
     const storagedCart = localStorage.getItem('@RocketShoes:cart')
 
     if (storagedCart) {
@@ -33,11 +34,38 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
+  console.log('#cart', cart)
+
+
   const addProduct = async (productId: number) => {
     try {
-      // TODO
+
+      const { amount: amountOnStock } = await getProductStock(productId)
+      const productInfos = await getProduct(productId)
+
+
+      const hasItemOnList = cart.find(item => item.id === productId)
+
+      console.log('#hasItemOnList', hasItemOnList)
+
+      if (hasItemOnList) {
+        const quantityOnCart = hasItemOnList.amount
+
+        if ((quantityOnCart + 1) > amountOnStock) {
+          toast.error('Quantidade não disponível no estoque!')
+          return
+        }
+
+        return updateProductAmount({ productId })
+      }
+
+
+      setCart([...cart, { ...productInfos, amount: 1, }])
+      toast('Produto adicionado com sucesso! :) ')
     } catch {
       // TODO
+
+      toast.error('Erro ao tentar adicionar produto ao carrinho, tente novamente! :(')
     }
   };
 
@@ -54,7 +82,21 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
-      // TODO
+
+      const updatedCart = cart.map(product => {
+        if (product.id === productId) {
+
+          return {
+            ...product,
+            amount: product.amount + 1
+          }
+        }
+
+        return product
+      })
+
+      setCart(updatedCart)
+      toast('Produto adicionado com sucesso! :) ')
     } catch {
       // TODO
     }

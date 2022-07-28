@@ -1,4 +1,5 @@
 import { MdAddShoppingCart } from "react-icons/md"
+import { useCart } from "../../hooks/useCart"
 
 type ProductProps = {
   image: string
@@ -13,6 +14,12 @@ type ProductCardProps = {
 }
 
 const ProductCard = ({ product: { id, price, priceFormatted, image, title } }: ProductCardProps): JSX.Element => {
+  const { addProduct } = useCart()
+
+  const handleAddProduct = (productId: number) => {
+    addProduct(productId)
+  }
+
 
   return (
     <li key={`product-card-${id}`}>
@@ -22,7 +29,7 @@ const ProductCard = ({ product: { id, price, priceFormatted, image, title } }: P
       <button
         type="button"
         data-testid="add-product-button"
-      // onClick={() => handleAddProduct(product.id)}
+        onClick={() => handleAddProduct(id)}
       >
         <div data-testid="cart-product-quantity">
           <MdAddShoppingCart size={16} color="#FFF" />

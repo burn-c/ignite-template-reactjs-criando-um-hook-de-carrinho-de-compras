@@ -15,3 +15,15 @@ export const getAllProducts: getAllProductsData = async () => {
 
   return data
 }
+
+export const getProductStock = async (productId: number) => {
+  const { data } = await api.get(`/stock/${productId}`)
+
+  return data
+}
+
+export const getProduct = async (productId: number) => {
+  const { data } = await api.get(`/products/${productId}`)
+
+  return data
+}
