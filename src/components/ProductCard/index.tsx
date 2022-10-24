@@ -11,15 +11,15 @@ type ProductProps = {
 
 type ProductCardProps = {
   product: ProductProps
+  cartItemAmount: number
 }
 
-const ProductCard = ({ product: { id, price, priceFormatted, image, title } }: ProductCardProps): JSX.Element => {
+const ProductCard = ({ product: { id, price, priceFormatted, image, title }, cartItemAmount }: ProductCardProps): JSX.Element => {
   const { addProduct } = useCart()
 
   const handleAddProduct = (productId: number) => {
     addProduct(productId)
   }
-
 
   return (
     <li key={`product-card-${id}`}>
@@ -33,7 +33,7 @@ const ProductCard = ({ product: { id, price, priceFormatted, image, title } }: P
       >
         <div data-testid="cart-product-quantity">
           <MdAddShoppingCart size={16} color="#FFF" />
-          {/* {cartItemsAmount[product.id] || 0} */} 2
+          {cartItemAmount ?? 0}
         </div>
 
         <span>ADICIONAR AO CARRINHO</span>

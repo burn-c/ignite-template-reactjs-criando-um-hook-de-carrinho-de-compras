@@ -24,7 +24,6 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
 
-
     const storagedCart = localStorage.getItem('@RocketShoes:cart')
 
     if (storagedCart) {
@@ -34,38 +33,38 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
-  console.log('#cart', cart)
-
-
   const addProduct = async (productId: number) => {
     try {
-
       const { amount: amountOnStock } = await getProductStock(productId)
-      const productInfos = await getProduct(productId)
 
+      const updatedCart = [...cart]
+      const hasItemOnList = updatedCart.find(item => item.id === productId)
+      const currentAmout = hasItemOnList ? hasItemOnList.amount : 0
+      const newAmount = currentAmout + 1
 
-      const hasItemOnList = cart.find(item => item.id === productId)
-
-      console.log('#hasItemOnList', hasItemOnList)
-
-      if (hasItemOnList) {
-        const quantityOnCart = hasItemOnList.amount
-
-        if ((quantityOnCart + 1) > amountOnStock) {
-          toast.error('Quantidade não disponível no estoque!')
-          return
-        }
-
-        return updateProductAmount({ productId })
+      if (newAmount > amountOnStock) {
+        toast.error('Quantidade solicitada fora de estoque')
+        return
       }
 
+      if (hasItemOnList) {
+        hasItemOnList.amount = newAmount
 
-      setCart([...cart, { ...productInfos, amount: 1, }])
-      toast('Produto adicionado com sucesso! :) ')
+      } else {
+        const productInfos = await getProduct(productId)
+
+        const newProduct = {
+          ...productInfos,
+          amount: 1
+        }
+
+        updatedCart.push(newProduct)
+      }
+
+      setCart(updatedCart)
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
     } catch {
-      // TODO
-
-      toast.error('Erro ao tentar adicionar produto ao carrinho, tente novamente! :(')
+      toast.error('Erro na adição do produto')
     }
   };
 
@@ -116,3 +115,6 @@ export function useCart(): CartContextData {
 
   return context;
 }
+
+
+

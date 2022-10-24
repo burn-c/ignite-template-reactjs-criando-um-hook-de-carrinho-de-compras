@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
 import { ProductList } from './styles';
-// import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
 import { useCart } from '../../hooks/useCart';
 import { getAllProducts } from '../../services/products';
@@ -19,17 +18,21 @@ interface ProductFormatted extends Product {
   priceFormatted: string;
 }
 
-// interface CartItemsAmount {
-//   [key: number]: number;
-// }
+interface CartItemsAmount {
+  [key: number]: number;
+}
 
 const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
-  const { addProduct, cart } = useCart();
+  const { cart } = useCart();
 
-  // const cartItemsAmount = cart.reduce((sumAmount, product) => {
-  //   // TODO
-  // }, {} as CartItemsAmount)
+  const cartItemsAmount = cart.reduce((sumAmount, product) => {
+    const newSumAmount = { ...sumAmount }
+    newSumAmount[product.id] = product.amount
+
+    return newSumAmount
+  }, {} as CartItemsAmount)
+
 
   useEffect(() => {
     async function loadProducts() {
@@ -39,7 +42,7 @@ const Home = (): JSX.Element => {
         const allProductsFormatted = allProducts?.map(product => {
           return {
             ...product,
-            priceFormatted: formatPrice(product.price)
+            priceFormatted: formatPrice(product.price),
           }
         })
 
@@ -52,13 +55,15 @@ const Home = (): JSX.Element => {
     loadProducts();
   }, []);
 
-  // function handleAddProduct(id: number) {
-  //   // TODO
-  // }
-
   return (
     <ProductList>
-      {products.map(product => (<ProductCard product={product} />))}
+      {products.map(product => (
+        <ProductCard
+          key={product.id}
+          product={product}
+          cartItemAmount={cartItemsAmount[product.id]}
+        />
+      ))}
     </ProductList>
   );
 };
