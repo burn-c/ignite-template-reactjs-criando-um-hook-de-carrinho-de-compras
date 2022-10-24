@@ -1,7 +1,6 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
-import { toast } from 'react-toastify';
+import { createContext, ReactNode, useContext, useState, useEffect, useRef } from 'react'; import { toast } from 'react-toastify';
 import { getProduct, getProductStock } from '../services/products';
-import { Product, Stock } from '../types';
+import { Product } from '../types';
 
 interface CartProviderProps {
   children: ReactNode;
@@ -33,9 +32,22 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
+  const prevCartRef = useRef<Product[]>()
+
+  useEffect(() => {
+    prevCartRef.current = cart
+  })
+
+  const cartPreviousValue = prevCartRef.current ?? cart
+
+  useEffect(() => {
+    if (cartPreviousValue !== cart) {
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart))
+    }
+  }, [cart, cartPreviousValue])
+
   const updatedCartAmount = (updatedCart: Product[]) => {
     setCart(updatedCart)
-    localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
   }
 
   const addProduct = async (productId: number) => {
