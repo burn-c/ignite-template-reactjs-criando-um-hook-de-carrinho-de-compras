@@ -33,6 +33,11 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
+  const updatedCartAmount = (updatedCart: Product[]) => {
+    setCart(updatedCart)
+    localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
+  }
+
   const addProduct = async (productId: number) => {
     try {
       const { amount: amountOnStock } = await getProductStock(productId)
@@ -61,8 +66,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         updatedCart.push(newProduct)
       }
 
-      setCart(updatedCart)
-      localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart))
+      updatedCartAmount(updatedCart)
     } catch {
       toast.error('Erro na adição do produto')
     }
@@ -70,9 +74,20 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const removeProduct = (productId: number) => {
     try {
-      // TODO
+      const updatedCart = [...cart]
+      const findProductIndex = updatedCart.findIndex(product => product.id === productId)
+      const hasProductOnCart = findProductIndex >= 0
+
+      if (hasProductOnCart) {
+        updatedCart.splice(findProductIndex, 1)
+
+        updatedCartAmount(updatedCart)
+      } else {
+        throw Error()
+      }
     } catch {
-      // TODO
+      toast.error('Erro na remoção do produto');
+      return
     }
   };
 
