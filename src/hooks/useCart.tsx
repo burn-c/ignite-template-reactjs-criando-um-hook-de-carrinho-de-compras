@@ -9,7 +9,7 @@ interface CartProviderProps {
 
 interface UpdateProductAmount {
   productId: number;
-  amount?: number;
+  amount: number;
 }
 
 interface CartContextData {
@@ -43,8 +43,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       const { amount: amountOnStock } = await getProductStock(productId)
 
       const updatedCart = [...cart]
-      const hasItemOnList = updatedCart.find(item => item.id === productId)
-      const currentAmout = hasItemOnList ? hasItemOnList.amount : 0
+      const hasItemOnCart = updatedCart.find(item => item.id === productId)
+      const currentAmout = hasItemOnCart ? hasItemOnCart.amount : 0
       const newAmount = currentAmout + 1
 
       if (newAmount > amountOnStock) {
@@ -52,8 +52,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         return
       }
 
-      if (hasItemOnList) {
-        hasItemOnList.amount = newAmount
+      if (hasItemOnCart) {
+        hasItemOnCart.amount = newAmount
 
       } else {
         const productInfos = await getProduct(productId)
@@ -96,23 +96,27 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     amount,
   }: UpdateProductAmount) => {
     try {
+      if (amount <= 0) return
 
-      const updatedCart = cart.map(product => {
-        if (product.id === productId) {
+      const { amount: amountOnStock } = await getProductStock(productId)
 
-          return {
-            ...product,
-            amount: product.amount + 1
-          }
-        }
+      const updatedCart = [...cart]
+      const hasItemOnCart = updatedCart.find(item => item.id === productId)
 
-        return product
-      })
+      if (amount > amountOnStock) {
+        toast.error('Quantidade solicitada fora de estoque')
+        return
+      }
 
-      setCart(updatedCart)
-      toast('Produto adicionado com sucesso! :) ')
+      if (hasItemOnCart) {
+        hasItemOnCart.amount = amount
+
+        updatedCartAmount(updatedCart)
+      } else {
+        throw Error()
+      }
     } catch {
-      // TODO
+      toast.error('Erro na alteração de quantidade do produto');
     }
   };
 
